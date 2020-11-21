@@ -1,0 +1,35 @@
+[DEFAULT]
+debug = {{ masakari_logging_debug }}
+log_dir = /var/log/kolla/masakari
+
+[api]
+region = {{ openstack_region_name }}
+auth_url = {{ keystone_admin_url }}
+user_domain_id = {{ default_user_domain_id }}
+project_name = service
+project_domain_id = {{ default_project_domain_id }}
+username = {{ masakari_keystone_user }}
+password = {{ masakari_keystone_password }}
+api_interface = internal
+
+[libvirt]
+connection_uri = "qemu+tcp://{{ migration_interface_address | put_address_in_context('url') }}/system"
+
+[host]
+### Default values for options
+# monitoring_driver = "default"
+# monitoring_interval = 60
+# api_retry_max = 12
+# api_retry_interval = 10
+# disable_ipmi_check = False
+# restrict_to_remotes = False
+# ipmi_timeout = 5
+# ipmi_retry_max = 3
+# ipmi_retry_interval = 10
+# stonith_wait = 30
+# tcpdump_timeout = 5  ## Deprecated. Replaced by pcs command.
+# corosync_multicast_interfaces = eth0  ## Deprecated
+# corosync_multicast_ports = 5405  ## Deprecated
+###
+disable_ipmi_check = True
+restrict_to_remotes = True
