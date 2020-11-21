@@ -102,6 +102,9 @@ Create ansible.cfg.::
     interpreter_python=/usr/bin/python3
     EOF
 
+Copy masakari directory to virtualenv.::
+
+    (ka) $ cp -a masakari ~/.envs/ka/share/kolla-ansible/ansible/roles/
 
 Copy multinode.sample to multinode and edit multinode file to set up inventory.
 

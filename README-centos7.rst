@@ -103,6 +103,10 @@ Create ansible.cfg.::
     deprecation_warnings = False
     EOF
 
+Copy masakari directory to virtualenv.::
+
+    (ka) $ cp -a masakari ~/.envs/ka/share/kolla-ansible/ansible/roles/
+
 Copy multinode.sample to multinode and edit multinode file to set up inventory.
 
 * Change hostnames as yours.
