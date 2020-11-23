@@ -1,0 +1,5 @@
+---
+- name: Removing Kolla images in remove_service variable
+  script: ../tools/cleanup-images --image {{ remove_service }}
+  when:
+    - remove_include_images | bool

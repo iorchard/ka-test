@@ -1,0 +1,2 @@
+---
+remove_include_images: "{{ enable_remove_images | default('no') }}"

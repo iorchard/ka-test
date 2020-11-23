@@ -1,0 +1,3 @@
+---
+- name: Remove containers and volumes in remove_service variable
+  script: ../tools/remove-containers {{ remove_service }}

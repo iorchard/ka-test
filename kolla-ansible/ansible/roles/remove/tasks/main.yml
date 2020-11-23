@@ -1,0 +1,10 @@
+---
+- fail: msg="Variable remove_service is not set. Please use -e to set it."
+  when: remove_service is not defined
+
+- include_tasks: validate_docker_execute.yml
+
+- include_tasks: remove_containers.yml
+
+- include_tasks: remove_images.yml
+

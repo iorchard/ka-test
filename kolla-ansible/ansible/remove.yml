@@ -1,0 +1,5 @@
+---
+- name: Apply role remove
+  hosts: all
+  roles:
+    - remove

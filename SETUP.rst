@@ -1,96 +1,22 @@
-Kolla-ansible Test
-====================
+Setup
+======
 
-This is openstack train installation guide for masakari test using 
-kolla-ansible on CentOS7 based machines
+This is a guide to set up openstack services using kolla-ansible.
 
-I created 6 virtual machines (3 master and 3 workers) with 
-openstack centos7 image.
+I denoted (Debian10) and (CentOS7) to distinguish which OS it is.
+If there is not denotation, it's common to both OS.
 
-* deployer node
+Pre-requisite
+--------------
 
-   - hostname: ka-m1
-   - CPU: 8 cores
-   - RAM; 8 GB
-   - Disk: 100 GB
-   - IP: 192.168.21.91
+Kolla-ansible should be installed.
 
-* master nodes
-
-   - hostname: ka-m{1,2,3}
-   - CPU: 8 cores
-   - RAM; 8 GB
-   - Disk: 100 GB
-   - IP: 192.168.21.9{1,2,3}
-
-* worker nodes
-
-   - hostname: ka-w{1,2,3}
-   - CPU: 8 cores
-   - RAM; 8 GB
-   - Disk: 100 GB
-   - IP: 192.168.21.9{4,5,6}
-
-Set up dependencies
---------------------
-
-deployer
-+++++++++
-
-Remove python-requests since it conflicts with kolla-ansible.::
-
-   $ sudo yum remove -y python-requests
-
-Install the packages::
-
-    $ sudo yum install -y python3-devel nfs-utils sshpass libselinux-python
-
-Install python package dependencies.::
-
-    $ python3 -m venv ~/.envs/ka
-    $ source ~/.envs/ka/bin/activate
-    (ka) $ pip install -U pip wheel
-    (ka) $ pip install 'ansible<2.10'
-
-master/worker nodes
-+++++++++++++++++++++
-
-Remove python-requests since it conflicts with kolla-ansible.::
-
-   $ sudo yum remove -y python-requests
-
-Install the packages::
-
-    $ sudo yum install -y python3 nfs-utils sshpass libselinux-python
-
-Install kolla-ansible
-------------------------
-
-Install kolla-ansible and its dependencies.::
-
-    (ka) $ pip install kolla-ansible==9.2.0
-
-Create /etc/kolla directory.::
-
-    (ka) $ sudo mkdir -p /etc/kolla
-    (ka) $ sudo chown $USER:$USER /etc/kolla
-
-Copy globals.yml and passwords.yml to /etc/kolla directory.::
-
-    (ka) $ cp globals.yml passwords.yml /etc/kolla/
-
-Caveat) If there is another openstack installation using kolla-ansible in
-the same network,
-Change keepalived_virtual_router_id(default: 51) in /etc/kolla/globals.yml
-(e.g. 251).::
-
-   (ka) $ vi /etc/kolla/globals.yml
-   ...
-   keepalived_virtual_router_id: "251"
+Refer to INSTALL.rst.
 
 Configure
 ----------
 
+*(CentOS7)*
 Create ansible.cfg.::
 
     (ka) $ cat << EOF > ansible.cfg
@@ -103,9 +29,39 @@ Create ansible.cfg.::
     deprecation_warnings = False
     EOF
 
+*(Debian10)*
+Create ansible.cfg.::
+
+    (ka) $ cat << EOF > ansible.cfg
+    [defaults]
+    nocolor = True
+    callback_whitelist = profile_tasks
+    host_key_checking=False
+    pipelining=True
+    forks=100
+    deprecation_warnings = False
+    interpreter_python=/usr/bin/python3
+    EOF
+
 Copy masakari directory to virtualenv.::
 
     (ka) $ cp -a masakari ~/.envs/ka/share/kolla-ansible/ansible/roles/
+
+Copy remove role to virtualenv.::
+
+    (ka) $ cp -a kolla-ansible/roles/remove \
+            ~/.envs/ka/share/kolla-ansible/ansible/roles/
+    (ka) $ cp kolla-ansible/remove.yml ~/.envs/ka/share/kolla-ansible/ansible/
+
+Copy kolla-ansible script to virtualenv.::
+
+   (ka) $ mv ~/.envs/ka/bin/kolla-ansible ~/.envs/ka/bin/kolla-ansible.bak
+   (ka) $ cp kolla-ansible/bin/kolla-ansible ~/.envs/ka/bin/
+
+Copy remove-container script to virtualenv.::
+
+   (ka) $ cp kolla-ansible/tools/remove-containers \
+            ~/.envs/ka/share/kolla-ansible/tools/
 
 Copy multinode.sample to multinode and edit multinode file to set up inventory.
 
@@ -158,13 +114,12 @@ Create /etc/kolla/config/nfs_shares for NFS backend.::
     (ka) $ mkdir -p /etc/kolla/config
     (ka) $ echo "<deployer>:/kolla_nfs" > /etc/kolla/config/nfs_shares
 
-Change hostname "<deployer>" to yours
+Change hostname "<deployer>" to yours.
 
 Deploy
 --------
 
 Bootstrap servers with kolla deploy dependencies::
-
     (ka) $ kolla-ansible -i multinode bootstrap-servers
 
 Do pre-deployment checks for hosts::
@@ -175,21 +130,36 @@ Finally proceed to actual OpenStack deployment::
 
     (ka) $ kolla-ansible -i multinode deploy
 
-It will take a while. 
+It will take a while.
 
-Deploy specific containers
+Deploy specific service
 ---------------------------
 
-Deploy masakari containers only.::
+Deploy masakari service only.::
 
    (ka) $ kolla-ansible -i multinode --tags masakari deploy
+
+Remove specific service
+-------------------------
+
+Remove masakari service only.::
+
+   (ka) $ kolla-ansible -i multinode \
+            -e remove_service='masakari' remove --include-images
+
+It stop and delete masakari containers and volumes and
+remove masakari images (--include-images option).
 
 Destroy
 --------
 
 To destroy the deployment, use --yes-i-really-really-mean-it option.::
 
-   (ka) $ kolla-ansible -i multinode destory --yes-i-really-really-mean-it
+   (ka) $ kolla-ansible -i multinode destroy \
+            --yes-i-really-really-mean-it --include-images
+
+It destroys all containers and volumes and 
+remove all kolla images (--include-images option).
 
 Using OpenStack
 ------------------
