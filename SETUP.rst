@@ -43,15 +43,10 @@ Create ansible.cfg.::
     interpreter_python=/usr/bin/python3
     EOF
 
-Copy masakari directory to virtualenv.::
+Copy masakari and remove roles to virtualenv.::
 
-    (ka) $ cp -a masakari ~/.envs/ka/share/kolla-ansible/ansible/roles/
-
-Copy remove role to virtualenv.::
-
-    (ka) $ cp -a kolla-ansible/roles/remove \
-            ~/.envs/ka/share/kolla-ansible/ansible/roles/
-    (ka) $ cp kolla-ansible/remove.yml ~/.envs/ka/share/kolla-ansible/ansible/
+    (ka) $ cp -a kolla-ansible/roles/* \
+               ~/.envs/ka/share/kolla-ansible/ansible/roles/
 
 Copy kolla-ansible script to virtualenv.::
 
